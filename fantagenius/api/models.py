@@ -2,7 +2,8 @@ from django.db import models
 
 
 class Player(models.Model):
-    name = models.CharField(max_length=50)
+    id = models.CharField(max_length=70, primary_key=True)
+    name = models.CharField(max_length=70)
     role = models.CharField(max_length=1)
     team = models.CharField(max_length=20)
     price = models.IntegerField(default=1)
@@ -17,6 +18,9 @@ class Player(models.Model):
     vote_avg = models.FloatField(default=0.0)
     magicvote_avg = models.FloatField(default=0.0)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Vote(models.Model):
     player = models.ForeignKey(Player)
@@ -30,3 +34,6 @@ class Vote(models.Model):
     red_cards = models.IntegerField(default=0)
     magicvote = models.FloatField(default=0.0)
     day = models.IntegerField(default=0)
+
+    def __unicode__(self):
+        return self.player.name
