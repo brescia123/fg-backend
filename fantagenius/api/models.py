@@ -1,11 +1,18 @@
 from django.db import models
 
 
+class Team(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return self.name
+
+
 class Player(models.Model):
     id = models.CharField(max_length=70, primary_key=True)
-    name = models.CharField(max_length=70)
+    name = models.CharField(max_length=50)
     role = models.CharField(max_length=1)
-    team = models.CharField(max_length=20)
+    team = models.ForeignKey(Team)
     price = models.IntegerField(default=1)
     attendances = models.IntegerField(default=0)
     gol = models.IntegerField(default=0)

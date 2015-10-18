@@ -1,4 +1,21 @@
-from models import Player, Vote
+from models import Player, Vote, Team
+from django.conf import settings
+import re
+import json
+import urllib
+import os
+
+
+def init_teams():
+    url = settings.KIMONO['teams_url']
+    key = os.environ.get('KIMONO_API_KEY')
+    results = json.load(urllib.urlopen(url + '?apikey=' + key))['results']
+    teams = results['collection1']
+    teams_name = [team['name'] for team in teams]
+    for team_name in teams_name:
+        t = Team()
+        t.name = team_name
+        t.save()
 
 
 def populate_players(players_json):
@@ -11,10 +28,10 @@ def populate_players(players_json):
         # TODO: remove dash and polish role:
         # 0 if player['price'] == '-' else player['price']
         # Using the last token of the URL as the pimary key
-        p.key = player['name']['href'].split('/')[-1]
+        p.id = player['name']['href'].split('/')[-1]
         p.name = player['name']['text']
-        p.role = player['role']
-        p.team = player['team']
+        p.role = re.sub('[^PDCA]', player['role'])
+        p.team = Team(player['team'])
         p.price = player['price']
         p.attendances = player['attendances']
         p.gol = player['gol']
