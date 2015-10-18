@@ -105,3 +105,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+KIMONO = {
+    'teams_url': 'https://www.kimonolabs.com/api/6hgzt61k',
+    'players_url': 'https://www.kimonolabs.com/api/2el7djzy',
+    'votes_url': 'https://www.kimonolabs.com/api/2nygy02o'
+}
