@@ -10,7 +10,7 @@ class Team(models.Model):
 
 class Player(models.Model):
     id = models.CharField(max_length=70, primary_key=True)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=70)
     role = models.CharField(max_length=1)
     team = models.ForeignKey(Team)
     price = models.IntegerField(default=1)
