@@ -41,6 +41,8 @@ class Vote(models.Model):
     red_cards = models.IntegerField(default=0)
     magicvote = models.FloatField(default=0.0)
     day = models.IntegerField(default=0)
+    sub_in = models.BooleanField(default=False)
+    sub_out = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.player.name
