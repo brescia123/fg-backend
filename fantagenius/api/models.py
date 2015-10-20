@@ -24,6 +24,7 @@ class Player(models.Model):
     penalties_saved = models.IntegerField(default=0)
     vote_avg = models.FloatField(default=0.0)
     magicvote_avg = models.FloatField(default=0.0)
+    seriea = models.BooleanField(default=True)
 
     def __unicode__(self):
         return self.name
