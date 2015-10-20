@@ -4,7 +4,7 @@ import re
 import json
 import urllib
 import os
-import loggin
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +48,7 @@ def update_players():
         # the past value
         p.id = _id_from_url(player['name']['href'])
         p.name = player['name']['text']
-        # Converting 'T (C)' or 'T (A)' to 'A' or 'C'
-        p.role = re.sub('[^PDCA]', '', player['role'])
+        p.role = _fix_role(player['role'])
         p.team = Team.objects.get(name__iexact=player['team'])
         p.price = player['price']
         # Replacing the '-' character with 0 in remaining fields
@@ -91,6 +90,7 @@ def update_votes():
             p = Player.objects.get(pk=p_id)
         except Player.DoesNotExist:
             p = Player(pk=p_id)
+            p.role = _fix_role(vote['role'])
             p.save()
         v.player = p
         v.vote = _fix_zero(vote['vote'])
@@ -119,6 +119,8 @@ def _update_orphan_players():
     for p in orphans:
         p_votes = Vote.objects.filter()
         p.name = _name_from_id(p.id)
+        p.seriea = False
+
         p.save()
 
 
@@ -145,6 +147,15 @@ def _fix_zero(value):
     Replaces the character '-' with the '0'
     '''
     return value.replace('-', '0')
+
+
+def _fix_role(value):
+    '''
+    Converting 'T (C)' or 'T (A)' to 'A' or 'C'. If there is no PDCA, it return
+    the same value
+    '''
+    result = re.sub('[^PDCA]', '', value)
+    return value if not result else result
 
 
 def _id_from_url(url):
