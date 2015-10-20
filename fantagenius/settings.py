@@ -106,6 +106,22 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'fantagenius.api': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
+
 KIMONO = {
     'teams_url': 'https://www.kimonolabs.com/api/6hgzt61k',
     'players_url': 'https://www.kimonolabs.com/api/2el7djzy',

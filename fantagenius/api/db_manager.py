@@ -4,27 +4,33 @@ import re
 import json
 import urllib
 import os
+import loggin
+
+logger = logging.getLogger(__name__)
 
 
 def update():
-    if not Team.objects.getAll().exists():
-        init_teams()
+    logger.info('Starting database update...')
+    init_teams()
     update_players()
     update_votes()
 
 
 def init_teams():
     '''
-    Initialize the Team table with the team names retrieved from Kimono
+    Initialize the Team table with the team names retrieved from Kimono if no
+    team is present
     '''
-    url = settings.KIMONO['teams_url']
-    teams = _get_results_collection1(url)
-    teams_name = [team['name'] for team in teams]
-    for team_name in teams_name:
-        if not Team.objects.filter(name__iexact=team_name).exists():
-            t = Team()
-            t.name = team_name
-            t.save()
+    if not Team.objects.all().exists():
+        logger.info('No teams found. Initializing teams...')
+        url = settings.KIMONO['teams_url']
+        teams = _get_results_collection1(url)
+        teams_name = [team['name'] for team in teams]
+        for team_name in teams_name:
+            if not Team.objects.filter(name__iexact=team_name).exists():
+                t = Team()
+                t.name = team_name
+                t.save()
 
 
 def update_players():
@@ -32,8 +38,10 @@ def update_players():
     Updates the Player table with the json retrieved from Kimono.
     If a player is not in the table it creates one.
     '''
+    logger.info('Updating players...')
     url = settings.KIMONO['players_url']
     players = _get_results_collection1(url)
+    logger.info(' - Updating database...')
     for player in players:
         p = Player()
         # If the player is already in the db, using the same pk end up updating
@@ -64,12 +72,12 @@ def update_votes():
     Updates the Vote table with the json retrieved from Kimono.
     If a vote is not in the table it creates one.
     '''
+    logger.info('Updating votes...')
     url = settings.KIMONO['votes_url']
     votes = _get_results_collection1(url)
     # Keeping a list of players with votes but not present in the Player table
     # so that they could be added later
-    # TODO: complete not in seria players eith the values retrieved from the
-    # votes
+    logger.info(' - Updating database...')
     for vote in votes:
         p_id = _id_from_url(vote['name']['href'])
         v_day = _day_from_url(vote['url'])
@@ -77,7 +85,7 @@ def update_votes():
         # exists it will get the current vote and update it
         try:
             v = Vote.objects.get(player__pk=p_id, day=v_day)
-        except Player.DoesNotExist:
+        except Vote.DoesNotExist:
             v = Vote()
         try:
             p = Player.objects.get(pk=p_id)
@@ -126,6 +134,7 @@ def _get_results_collection1(url):
     Given an url it returns the the array 'collection1' that is present in the
     results from Kimono
     '''
+    logger.info(' - Contacting Kimono. %s' % (url))
     key = os.environ.get('KIMONO_API_KEY')
     results = json.load(urllib.urlopen(url + '?apikey=' + key))['results']
     return results['collection1']
