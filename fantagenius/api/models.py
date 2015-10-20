@@ -12,7 +12,7 @@ class Player(models.Model):
     id = models.CharField(max_length=70, primary_key=True)
     name = models.CharField(max_length=70)
     role = models.CharField(max_length=1)
-    team = models.ForeignKey(Team)
+    team = models.ForeignKey(Team, null=True, blank=True)
     price = models.IntegerField(default=1)
     attendances = models.IntegerField(default=0)
     gol = models.IntegerField(default=0)
