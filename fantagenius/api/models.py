@@ -20,6 +20,7 @@ class Player(models.Model):
     yellow_cards = models.IntegerField(default=0)
     red_cards = models.IntegerField(default=0)
     penalties_kicked = models.IntegerField(default=0)
+    penalties_scored = models.IntegerField(default=0)
     penalties_missed = models.IntegerField(default=0)
     penalties_saved = models.IntegerField(default=0)
     vote_avg = models.FloatField(default=0.0)
