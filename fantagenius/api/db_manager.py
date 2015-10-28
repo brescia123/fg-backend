@@ -1,5 +1,6 @@
 from models import Player, Vote, Team
 from django.conf import settings
+from django.db.models import Count, Sum
 import re
 import json
 import urllib
@@ -58,6 +59,7 @@ def update_players():
         p.yellow_cards = _fix_zero(player['yellow_cards'])
         p.red_cards = _fix_zero(player['red_cards'])
         p.penalties_kicked = _fix_zero(player['penalties_kicked'])
+        p.penalties_scored = _fix_zero(player['penalties_scored'])
         p.penalties_missed = _fix_zero(player['penalties_missed'])
         p.penalties_saved = _fix_zero(player['penalties_saved'])
         p.vote_avg = _fix_zero(player['vote_avg'])
@@ -112,15 +114,38 @@ def update_votes():
 
 def _update_orphan_players():
     '''
-    Finds the players with no team and updates their stats querying the votes
+    Finds players with no team and updates their stats querying the votes
     table
     '''
     orphans = Player.objects.exclude(team__isnull=False)
     for p in orphans:
-        p_votes = Vote.objects.filter()
         p.name = _name_from_id(p.id)
         p.seriea = False
-
+        p.price = 0
+        v = Vote.objects
+        ag = v.filter(player__pk=p.id).aggregate(Count('pk'),
+                                                 Sum('gol'),
+                                                 Sum('assist'),
+                                                 Sum('penalties_scored_saved'),
+                                                 Sum('penalties_missed'),
+                                                 Sum('own_gol'),
+                                                 Sum('yellow_cards'),
+                                                 Sum('red_cards'),
+                                                 Sum('vote'),
+                                                 Sum('magicvote'),)
+        p.attendances = ag['pk__count']
+        p.gol = ag['gol__sum']
+        p.assist = ag['assist__sum']
+        if p.role == 'P':
+            p.penalties_saved = ag['penalties_scored_saved__sum']
+        else:
+            p.penalties_scored = ag['penalties_scored_saved__sum']
+        p.penalties_missed = ag['penalties_missed__sum']
+        p.own_gol = ag['own_gol__sum']
+        p.yellow_cards = ag['yellow_cards__sum']
+        p.red_cards = ag['red_cards__sum']
+        p.vote = ag['vote__sum'] / p.attendances
+        p.magicvote = ag['magicvote__sum'] / p.attendances
         p.save()
 
 
@@ -146,7 +171,9 @@ def _fix_zero(value):
     '''
     Replaces the character '-' with the '0'
     '''
-    return value.replace('-', '0')
+    # Match the '-' which are not followed by a number
+    regex = '-(?![0-9])'
+    return re.sub(regex, '0', value)
 
 
 def _fix_role(value):
