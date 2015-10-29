@@ -7,4 +7,4 @@ script:
 services:
   - postgresql
 before_script:
-  - psql -c 'create database fg_db;' -U travis
+  - psql -c 'CREATE DATABASE fg_db;' -U postgres

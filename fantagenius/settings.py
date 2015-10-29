@@ -91,7 +91,7 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'fg_db',
-            'USER': 'travis',
+            'USER': 'postgres',
             'PASSWORD': '',
             'HOST': 'localhost',
             'PORT': '',
