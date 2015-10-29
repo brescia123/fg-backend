@@ -2,6 +2,9 @@ language: python
 pyhton:
 - '2.7'
 install: pip install -r requirements.txt
-script: python manage.py test
+script:
+  - python manage.py test
 services:
   - postgresql
+before_script:
+  - psql -c 'create database fg_db;' -U travis
