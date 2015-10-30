@@ -19,19 +19,18 @@ def update():
 
 def init_teams():
     '''
-    Initialize the Team table with the team names retrieved from Kimono if no
-    team is present
+    Initialize the Team table with the team names retrieved from Kimono.
+    It removes all the entries and re-adds them.
     '''
-    if not Team.objects.all().exists():
-        logger.info('No teams found. Initializing teams...')
-        url = settings.KIMONO['teams_url']
-        teams = _get_results_collection1(url)
-        teams_name = [team['name'] for team in teams]
-        for team_name in teams_name:
-            if not Team.objects.filter(name__iexact=team_name).exists():
-                t = Team()
-                t.name = team_name
-                t.save()
+    Team.objects.all().delete()
+    logger.info('Initializing teams...')
+    url = settings.KIMONO['teams_url']
+    teams = _get_results_collection1(url)
+    teams_name = [team['name'] for team in teams]
+    for team_name in teams_name:
+        t = Team()
+        t.name = team_name
+        t.save()
 
 
 def update_players():
