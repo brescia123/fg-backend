@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'fantagenius.api',
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -120,4 +121,8 @@ KIMONO = {
     'teams_url': 'https://www.kimonolabs.com/api/6hgzt61k',
     'players_url': 'https://www.kimonolabs.com/api/2el7djzy',
     'votes_url': 'https://www.kimonolabs.com/api/2nygy02o'
+}
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10
 }
