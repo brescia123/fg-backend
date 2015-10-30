@@ -6,5 +6,6 @@ router = routers.DefaultRouter()
 router.register(r'teams', views.TeamViewSet)
 
 urlpatterns = [
+    url(r'update', views.update_db),
     url(r'^', include(router.urls)),
 ]
