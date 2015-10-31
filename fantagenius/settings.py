@@ -26,7 +26,7 @@ SECRET_KEY = '01=b=%o)w*=pk1haj938fu8ptxa_f#s269smft3%_z61_87)be'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # Set if DEBUG is False
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['fg-backend.herokuapp.com']
 
 
 # Application definition
