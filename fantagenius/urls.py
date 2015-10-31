@@ -4,6 +4,8 @@ from fantagenius.api import views
 
 router = routers.DefaultRouter()
 router.register(r'teams', views.TeamViewSet)
+router.register(r'player', views.PlayerViewSet)
+router.register(r'vote', views.VoteViewSet)
 
 urlpatterns = [
     url(r'update', views.update_db),
