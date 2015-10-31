@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from fantagenius.api.serializers import TeamSerializer
 from fantagenius.api import db_manager
+from threading import Thread
 
 
 class TeamViewSet(viewsets.ModelViewSet):
@@ -15,5 +16,8 @@ class TeamViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 def update_db(request):
-    db_manager.update()
+    try:
+        Thread(target=db_manager.update).start()
+    except Exception, errtxt:
+        print errtxt
     return Response(status=status.HTTP_200_OK)

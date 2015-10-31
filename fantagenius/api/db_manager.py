@@ -15,6 +15,7 @@ def update():
     init_teams()
     update_players()
     update_votes()
+    logger.info('Database updated!')
 
 
 def init_teams():
