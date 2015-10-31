@@ -1,4 +1,4 @@
-from models import Player, Vote, Team
+from models import Player, Vote, Team, UpdateRun
 from django.conf import settings
 from django.db.models import Count, Sum
 import re
@@ -6,16 +6,33 @@ import json
 import urllib
 import os
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
 
 def update():
     logger.info('Starting database update...')
+    start = time.time()
     init_teams()
-    update_players()
-    update_votes()
+    no_new_p = update_players()
+    no_new_v, no_new_o = update_votes()
+    update_orphan_players()
+    end = time.time()
+    duration = float('%.1f' % (end-start))
+    update_run = UpdateRun(duration=duration,
+                           no_new_votes=no_new_v,
+                           no_new_players=no_new_p,
+                           no_new_orphans=no_new_o)
+    update_run.save()
     logger.info('Database updated!')
+    logger.info(update_run)
+
+
+def drop_db():
+    Team.objects.all().delete()
+    Player.objects.all().delete()
+    Vote.objects.all().delete()
 
 
 def init_teams():
@@ -23,31 +40,35 @@ def init_teams():
     Initialize the Team table with the team names retrieved from Kimono.
     It removes all the entries and re-adds them.
     '''
-    Team.objects.all().delete()
     logger.info('Initializing teams...')
     url = settings.KIMONO['teams_url']
     teams = _get_results_collection1(url)
     teams_name = [team['name'] for team in teams]
     for team_name in teams_name:
-        t = Team()
-        t.name = team_name
-        t.save()
+        if not Team.objects.filter(name__iexact=team_name).exists():
+            t = Team()
+            t.name = team_name
+            t.save()
 
 
 def update_players():
     '''
     Updates the Player table with the json retrieved from Kimono.
     If a player is not in the table it creates one.
+    Returns the number of new palyers added to the db
     '''
     logger.info('Updating players...')
     url = settings.KIMONO['players_url']
     players = _get_results_collection1(url)
     logger.info(' - Updating database...')
+    no_new_players = 0
     for player in players:
         p = Player()
         # If the player is already in the db, using the same pk end up updating
         # the past value
         p.id = _id_from_url(player['name']['href'])
+        if not Player.objects.filter(pk=p.id).exists():
+            no_new_players += 1
         p.name = player['name']['text']
         p.role = _fix_role(player['role'])
         p.team = Team.objects.get(name__iexact=player['team'])
@@ -66,12 +87,14 @@ def update_players():
         p.magicvote_avg = _fix_zero(player['magicvote_avg'])
         # Storing on the db
         p.save()
+    return no_new_players
 
 
 def update_votes():
     '''
     Updates the Vote table with the json retrieved from Kimono.
     If a vote is not in the table it creates one.
+    Returns the number of new votes and new orphan players added to the db
     '''
     logger.info('Updating votes...')
     url = settings.KIMONO['votes_url']
@@ -79,6 +102,9 @@ def update_votes():
     # Keeping a list of players with votes but not present in the Player table
     # so that they could be added later
     logger.info(' - Updating database...')
+    no_new_votes = 0
+    no_new_orphans = 0
+    print len(votes)
     for vote in votes:
         p_id = _id_from_url(vote['name']['href'])
         v_day = _day_from_url(vote['url'])
@@ -88,12 +114,16 @@ def update_votes():
             v = Vote.objects.get(player__pk=p_id, day=v_day)
         except Vote.DoesNotExist:
             v = Vote()
+            no_new_votes += 1
+        # Creating a orphan player if there is not a player for this vote
         try:
             p = Player.objects.get(pk=p_id)
         except Player.DoesNotExist:
             p = Player(pk=p_id)
             p.role = _fix_role(vote['role'])
             p.save()
+            print 'ok'
+            no_new_orphans += 1
         v.player = p
         v.vote = _fix_zero(vote['vote'])
         v.gol = _fix_zero(vote['gol'])
@@ -109,10 +139,10 @@ def update_votes():
         v.sub_out = _sub_out(vote['out']['class'])
         # Storing on the db
         v.save()
-    _update_orphan_players()
+    return no_new_votes, no_new_orphans
 
 
-def _update_orphan_players():
+def update_orphan_players():
     '''
     Finds players with no team and updates their stats querying the votes
     table

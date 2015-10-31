@@ -48,3 +48,19 @@ class Vote(models.Model):
 
     def __unicode__(self):
         return self.player.name
+
+
+class UpdateRun(models.Model):
+    run_date = models.DateField(auto_now_add=True)
+    duration = models.FloatField()
+    no_new_votes = models.IntegerField(default=0)
+    no_new_players = models.IntegerField(default=0)
+    no_new_orphans = models.IntegerField(default=0)
+
+    def __unicode__(self):
+        return ('Update summury:\n'
+                ' Date - ' + self.run_date.strftime('%d/%b/%y %H.%M.%S') + '\n'
+                ' Duration - %.1f' % (self.duration) + '\n'
+                ' New Votes: - %i' % (self.no_new_votes) + '\n'
+                ' New Players - %i' % (self.no_new_players) + '\n'
+                ' New Orphans - %i' % (self.no_new_orphans) + '\n')
