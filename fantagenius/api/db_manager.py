@@ -155,15 +155,22 @@ def _name_from_id(p_id):
     return ' '.join(p_id.split('_')[:-1]).title()
 
 
-def _get_results_collection1(url):
+def _get_results_collection1(url, offset=0):
     '''
     Given an url it returns the the array 'collection1' that is present in the
     results from Kimono
+    Kimono has a result limit of 2500 rows. If that limit is reached
+    it recursively calls the API with increasing offsets
     '''
-    logger.info(' - Contacting Kimono. %s' % (url))
+    logger.info(' - Contacting Kimono %s with offset %s' % (url, offset))
     key = os.environ.get('KIMONO_API_KEY')
-    results = json.load(urllib.urlopen(url + '?apikey=' + key))['results']
-    return results['collection1']
+    fp = urllib.urlopen(url + '?apikey=' + key + '&kimoffset=%i' % (offset))
+    results = json.load(fp)
+    collection1 = results['results']['collection1']
+    if results['count'] == 2500:
+        new_collection1 = _get_results_collection1(url, offset=offset + 2500)
+        collection1.extend(new_collection1)
+    return collection1
 
 
 def _fix_zero(value):
