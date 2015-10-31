@@ -1,1 +1,1 @@
-web: web: python manage.py runserver --no-reload
+web: gunicorn fantagenius.wsgi
