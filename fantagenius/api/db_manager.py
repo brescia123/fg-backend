@@ -104,7 +104,6 @@ def update_votes():
     logger.info(' - Updating database...')
     no_new_votes = 0
     no_new_orphans = 0
-    print len(votes)
     for vote in votes:
         p_id = _id_from_url(vote['name']['href'])
         v_day = _day_from_url(vote['url'])
@@ -122,7 +121,6 @@ def update_votes():
             p = Player(pk=p_id)
             p.role = _fix_role(vote['role'])
             p.save()
-            print 'ok'
             no_new_orphans += 1
         v.player = p
         v.vote = _fix_zero(vote['vote'])

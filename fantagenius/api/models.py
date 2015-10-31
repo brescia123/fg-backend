@@ -51,7 +51,7 @@ class Vote(models.Model):
 
 
 class UpdateRun(models.Model):
-    run_date = models.DateField(auto_now_add=True)
+    run_date = models.DateTimeField(auto_now_add=True)
     duration = models.FloatField()
     no_new_votes = models.IntegerField(default=0)
     no_new_players = models.IntegerField(default=0)
