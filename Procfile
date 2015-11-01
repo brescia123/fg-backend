@@ -1,1 +1,1 @@
-web: gunicorn fantagenius.wsgi
+web: gunicorn fantagenius.wsgi --log-file -
