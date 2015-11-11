@@ -3,6 +3,8 @@ from django.db import models
 
 class Team(models.Model):
     name = models.CharField(max_length=20)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return self.name
@@ -26,6 +28,8 @@ class Player(models.Model):
     vote_avg = models.FloatField(default=0.0)
     magicvote_avg = models.FloatField(default=0.0)
     seriea = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return self.name
@@ -45,6 +49,8 @@ class Vote(models.Model):
     day = models.IntegerField(default=0)
     sub_in = models.BooleanField(default=False)
     sub_out = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return self.player.name
