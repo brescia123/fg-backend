@@ -28,9 +28,9 @@ class VoteViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = VoteSerializer
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def update_db(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         logger.info('Update request')
         try:
             Thread(target=db_manager.update).start()
